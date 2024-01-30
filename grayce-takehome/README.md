@@ -1,0 +1,2 @@
+installed Axios
+installed jsPDF

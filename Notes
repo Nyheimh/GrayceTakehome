@@ -1,0 +1,19 @@
+use_case
+    pregnancy
+    adult
+    infant
+    aging_loved_one
+    grieving
+    self
+
+care_recipient_location
+    timezone
+
+
+
+
+use_case == specialties
+
+care_recipient_location[timezone] === timezone 
+
+
