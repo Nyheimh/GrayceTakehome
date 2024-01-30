@@ -6,46 +6,52 @@ function MembersandPartners() {
   const [members, setMembers] = useState(null);
   const [carePartners, setCarePartners] = useState(null);
   const [matches, setMatches] = useState(null);
+  const [jsonRendered, setJsonRendered] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
-      const memberData = await fetchMemberData();
-      const carePartnerData = await fetchCarePartnerData();
-
-      if (memberData && carePartnerData) {
+      try {
+        const memberData = await fetchMemberData();
+        const carePartnerData = await fetchCarePartnerData();
         setMembers(memberData);
         setCarePartners(carePartnerData);
+      } catch (error) {
+        console.error("Unable to fetch", error);
       }
     }
     fetchData();
   }, []);
 
   useEffect(() => {
-    if (members && carePartners) {
+    function formMatches(membersData, carePartnersData) {
+      const matches = [];
+
+      membersData.forEach((member) => {
+        const matchedCarePartner = findBestCarePartner(
+          member,
+          carePartnersData
+        );
+
+        if (matchedCarePartner) {
+          matches.push({
+            member_id: member.id,
+            care_partner_id: matchedCarePartner.id,
+          });
+        }
+      });
+
+      return matches;
+    }
+
+    if (members && carePartners && !jsonRendered) {
       const matchedPairs = formMatches(members, carePartners);
       setMatches(matchedPairs);
+      setJsonRendered(true);
     }
-  });
-
-  function formMatches(membersData, carePartnersData) {
-    const matches = [];
-
-    membersData.forEach((member) => {
-      const matchedCarePartner = findBestCarePartner(member, carePartnersData);
-
-      if (matchedCarePartner) {
-        matches.push({
-          member_id: member.id,
-          care_partner_id: matchedCarePartner.id,
-        });
-      }
-    });
-
-    return matches;
-  }
+  }, [members, carePartners, jsonRendered]);
 
   function findBestCarePartner(member, carePartnersData) {
-    const matchingCarePartners = carePartnersData.filter(
+    const matchingCarePartners = carePartnersData?.filter(
       (carePartner) =>
         carePartner.specialties.includes(member.use_case) &&
         carePartner.timezone === member.caregiver_location.timezone
@@ -58,9 +64,10 @@ function MembersandPartners() {
     }
   }
 
-  function downloadPdf(data, filename) {
-    const jsonStr = JSON.stringify(data, null, 2);
+  const JSONMatches = JSON.stringify(matches, null, 2);
 
+  function downloadPdf(matches, filename) {
+    const jsonStr = JSON.stringify(matches, null, 2);
     const doc = new jsPDF();
 
     doc.setFontSize(12);
@@ -72,33 +79,30 @@ function MembersandPartners() {
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignContent: "center",
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "column",
-      }}
-    >
-      <h2>Members and Care Partners Matches</h2>
-      <button
+    <div>
+      <div
         style={{
-          borderRadius: "50px",
-          border: "2px purple solid",
-          backgroundColor: "white",
+          display: "flex",
+          alignContent: "center",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column",
         }}
-        onClick={downloadMatchesPdf}
       >
-        Download JSON matches
-      </button>
-      {/* If information is displayed */}
-      {/* {matches &&
-        matches.map((match) => (
-          <div key={`${match.member_id}-${match.care_partner_id}`}>
-            ID: {match.member_id} , Care Partner ID: {match.care_partner_id}
-          </div>
-        ))} */}
+        <h2>Members and Care Partners Matches</h2>
+        <button
+          style={{
+            borderRadius: "50px",
+            border: "2px purple solid",
+            backgroundColor: "white",
+          }}
+          onClick={downloadMatchesPdf}
+        >
+          PDF Prettier Version
+        </button>
+      </div>
+
+      <pre>{JSONMatches}</pre>
     </div>
   );
 }
