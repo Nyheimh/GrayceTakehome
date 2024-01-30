@@ -79,7 +79,7 @@ function MembersandPartners() {
   };
 
   return (
-    <div>
+    <div style={{ backgroundColor: "rgb(243, 242, 255)" }}>
       <div
         style={{
           display: "flex",
@@ -89,12 +89,16 @@ function MembersandPartners() {
           flexDirection: "column",
         }}
       >
-        <h2>Members and Care Partners Matches</h2>
+        <h2 style={{ color: "#250a77" }}>Members and Care Partners Matches</h2>
         <button
           style={{
-            borderRadius: "50px",
-            border: "2px purple solid",
-            backgroundColor: "white",
+            background: "#2f86b0",
+            color: "#fefefe",
+            fontSize: "1rem",
+            padding: "0.625rem 1.5rem",
+            borderRadius: 20,
+            margin: "0 0.625rem",
+            cursor: "pointer",
           }}
           onClick={downloadMatchesPdf}
         >
